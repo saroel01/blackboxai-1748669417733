@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemilihan Online - Portal Pemilih</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .transition-all {
+            transition-duration: 300ms;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 min-h-screen">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+        <div class="max-w-md w-full">
+            <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-10 border border-gray-200">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Portal Pemilih
+                    </h2>
+                    <p class="mt-4 text-gray-600 text-lg">
+                        Masukkan token untuk mengakses sistem pemilihan
+                    </p>
+                </div>
+                <form id="loginForm" class="mt-10 space-y-8">
+                    <div class="relative">
+                        <label for="token" class="sr-only">Token Pemilihan</label>
+                        <input id="token" name="token" type="text" required 
+                            class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" 
+                            placeholder="Masukkan token pemilihan Anda">
+                    </div>
+                    <div>
+                        <button type="submit" 
+                            class="group relative w-full flex justify-center py-4 px-6 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
+                            Masuk ke Sistem
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voting Section -->
+    <div id="votingSection" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-20 items-center">
+                    <div class="flex items-center space-x-5">
+                        <img id="schoolLogo" src="" alt="Logo Sekolah" class="h-12 w-12 object-contain hidden" />
+                        <div>
+                            <h1 id="electionName" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                                Sistem Pemilihan Online
+                            </h1>
+                            <p id="institutionName" class="text-sm text-gray-600 font-medium">Nama Instansi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div id="voterInfo" class="text-right mr-6">
+                            <p class="text-base font-semibold text-gray-900" id="parentName"><!-- Populated by JS --></p>
+                            <p class="text-sm text-gray-500" id="studentName"><!-- Populated by JS --></p>
+                        </div>
+                        <button id="logoutBtn" 
+                            class="transform hover:scale-105 transition-all px-5 py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100">
+                            Keluar
+                        </button>
+                    </div>
+                    <img id="agencyLogo" src="" alt="Logo Dinas" class="h-12 w-12 object-contain hidden ml-6" />
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+            <!-- Election Status -->
+            <div id="electionStatus" class="max-w-4xl mx-auto mb-8">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Voting Interface -->
+            <div class="max-w-5xl mx-auto">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <h2 class="text-4xl font-bold mb-10 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Pilih Kandidat
+                    </h2>
+                    
+                    <!-- Instructions -->
+                    <div class="mb-10 p-8 bg-blue-50 rounded-2xl border border-blue-100">
+                        <h3 class="text-xl font-semibold mb-6 text-gray-900">Petunjuk Pemilihan</h3>
+                        <ul class="space-y-4 text-gray-600 text-base">
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Pilih satu kandidat dari daftar di bawah ini
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Periksa pilihan Anda dengan teliti
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Klik "Kirim Suara" untuk mengirim pilihan Anda
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-6 h-6 mr-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Suara Anda bersifat rahasia dan tidak dapat diubah setelah dikirim
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Candidate List -->
+                    <form id="votingForm" class="space-y-8">
+                        <div id="candidateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Will be populated by JavaScript with cards like this:
+                            <div class="candidate-card bg-white/95 rounded-2xl shadow-md overflow-hidden transition-all hover:shadow-xl">
+                                <img src="candidate-photo.jpg" alt="Foto Kandidat" class="w-full h-52 object-cover">
+                                <div class="p-6">
+                                    <h3 class="text-xl font-semibold text-gray-900">Nama Kandidat</h3>
+                                    <div class="mt-6">
+                                        <label class="inline-flex items-center">
+                                            <input type="radio" name="candidate" value="id" class="form-radio text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-3 text-base">Pilih Kandidat</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+
+                        <div class="mt-10">
+                            <button type="submit" 
+                                class="w-full flex justify-center py-4 px-6 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all hover:shadow-xl">
+                                Kirim Suara
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-fadeIn">
+                <div class="bg-white px-6 pt-6 pb-4 sm:p-8 sm:pb-6">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-xl leading-6 font-semibold text-gray-900" id="modal-title">
+                                Konfirmasi Pilihan
+                            </h3>
+                            <div class="mt-4">
+                                <p class="text-gray-600 text-base">
+                                    Apakah Anda yakin ingin memilih <span id="selectedCandidate" class="font-medium text-gray-900"></span>? 
+                                    Pilihan ini tidak dapat diubah setelah dikonfirmasi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 sm:px-8 sm:flex sm:flex-row-reverse rounded-b-3xl">
+                    <button type="button" id="confirmVoteBtn"
+                        class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-lg px-6 py-3 bg-blue-600 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 sm:ml-4 sm:w-auto sm:text-sm transform hover:scale-105 transition-all">
+                        Konfirmasi Pilihan
+                    </button>
+                    <button type="button" id="cancelVoteBtn"
+                        class="mt-4 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-md px-6 py-3 bg-white text-base font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 sm:mt-0 sm:ml-4 sm:w-auto sm:text-sm transform hover:scale-105 transition-all">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-3xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full animate-fadeIn">
+                <div class="bg-white px-6 pt-6 pb-4 sm:p-8 sm:pb-6">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-xl leading-6 font-semibold text-gray-900" id="modal-title">
+                                Suara Berhasil Dikirim
+                            </h3>
+                            <div class="mt-4">
+                                <p class="text-gray-600 text-base">
+                                    Terima kasih telah berpartisipasi dalam pemilihan. Suara Anda telah tercatat.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 sm:px-8 sm:flex sm:flex-row-reverse rounded-b-3xl">
+                    <button type="button" id="closeSuccessBtn"
+                        class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-lg px-6 py-3 bg-blue-600 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 sm:ml-3 sm:w-auto transform hover:scale-105 transition-all">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white shadow-md mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p id="footerText" class="text-center text-gray-600 text-sm">
+                © 2024 Sistem Pemilihan Online. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Import Firebase config -->
+    <script type="module" src="firebase-config.js"></script>
+    <!-- Import page specific JavaScript -->
+    <script type="module" src="js/voter.js"></script>
+</body>
+</html>
