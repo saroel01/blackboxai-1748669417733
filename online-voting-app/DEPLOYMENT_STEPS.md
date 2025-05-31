@@ -25,10 +25,17 @@ Dokumen ini berisi panduan langkah demi langkah untuk melakukan deploy Aplikasi 
 ## Langkah 2: Mengonfigurasi Layanan Firebase
 
 1. Di Firebase Console, buka menu **Build > Authentication**.
-2. Klik **Mulai** dan aktifkan metode masuk yang diperlukan aplikasi Anda (misalnya, Email/Password).
-3. Buka menu **Build > Firestore Database**.
-4. Klik **Buat database** dan pilih mode produksi atau pengujian sesuai kebutuhan.
-5. Atur aturan dan indeks Firestore yang diperlukan aplikasi Anda.
+2. Klik **Mulai** dan aktifkan metode masuk **Email/Password**.
+3. Setelah diaktifkan, klik **Users** dan kemudian klik **Add User**.
+4. Buat akun admin dengan mengisi:
+   - Email: (email admin Anda)
+   - Password: (password yang kuat)
+   - Simpan kredensial ini dengan aman karena akan digunakan untuk login ke aplikasi.
+5. Buka menu **Build > Firestore Database**.
+6. Klik **Buat database** dan pilih mode produksi atau pengujian sesuai kebutuhan.
+7. Atur aturan dan indeks Firestore yang diperlukan aplikasi Anda.
+
+**Catatan Penting**: Pastikan untuk membuat akun admin sebelum melakukan deploy aplikasi, karena ini akan menjadi satu-satunya cara untuk mengakses dashboard admin.
 
 ---
 
