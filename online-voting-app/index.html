@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pemilihan Online - Hasil</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .transition-all {
+            transition-duration: 300ms;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-card {
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-20 items-center">
+                    <div class="flex items-center space-x-5">
+                        <img id="schoolLogo" src="" alt="Logo Sekolah" class="h-12 w-12 object-contain hidden" />
+                        <div>
+                            <h1 id="electionName" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                                Sistem Pemilihan Online
+                            </h1>
+                            <p id="institutionName" class="text-sm text-gray-600 font-medium">Nama Instansi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <a href="voter.html" 
+                           class="transform hover:scale-105 transition-all px-5 py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100">
+                            Login Pemilih
+                        </a>
+                        <a href="admin.html" 
+                           class="transform hover:scale-105 transition-all px-5 py-2.5 text-base font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg">
+                            Admin
+                        </a>
+                    </div>
+                    <img id="agencyLogo" src="" alt="Logo Dinas" class="h-12 w-12 object-contain hidden ml-6" />
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto py-10 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+            <!-- Results Section -->
+            <div class="max-w-5xl mx-auto">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10">
+                    <h2 class="text-4xl font-bold mb-10 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Hasil Pemilihan
+                    </h2>
+                    
+                    <!-- Results Status -->
+                    <div id="resultsStatus" class="mb-10 p-8 bg-blue-50 rounded-2xl border border-blue-100">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Participation Statistics -->
+                    <div class="mb-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-6">Statistik Partisipasi</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-base font-medium text-gray-700">Total Suara Masuk</span>
+                                        <span class="text-base font-medium text-gray-900" id="totalVotesCast">0/0</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-600 h-3 rounded-full progress-bar" id="votesProgress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-base font-medium text-gray-700">Persentase Partisipasi</span>
+                                        <span class="text-base font-medium text-gray-900" id="participationPercent">0%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-600 h-3 rounded-full progress-bar" id="participationProgress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-6">Status Pemilihan</h3>
+                            <div id="electionStatus" class="text-gray-700 text-base">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Display -->
+                    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Will be populated by JavaScript with cards like:
+                        <div class="result-card bg-white/95 rounded-2xl shadow-md overflow-hidden transition-all hover:shadow-xl">
+                            <img src="candidate-photo.jpg" alt="Foto Kandidat" class="w-full h-52 object-cover">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold mb-4 text-gray-900">Nama Kandidat</h3>
+                                <div class="mb-4">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-base font-medium text-gray-700">Perolehan Suara</span>
+                                        <span class="text-base font-medium text-gray-900">75%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-blue-600 h-3 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                                <p class="text-base text-gray-600">Total: 150 suara</p>
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white shadow-md mt-auto">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <p id="footerText" class="text-center text-gray-600 text-sm font-medium">
+                    © 2024 Sistem Pemilihan Online. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Import scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="js/public.js"></script>
+</body>
+</html>
