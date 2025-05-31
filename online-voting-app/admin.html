@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Sistem Pemilihan Online</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- No Firebase SDK needed for demo -->
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .transition-all {
+            transition-duration: 300ms;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-button.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        .tab-button:not(.active):hover {
+            color: #3b82f6;
+            border-bottom: 2px solid #bfdbfe;
+        }
+
+        .candidate-card {
+            transition: all 0.3s ease;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Enhance file input styling */
+        input[type="file"] {
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        input[type="file"]::file-selector-button {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-gray-100 min-h-screen">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+        <div class="max-w-md w-full">
+            <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-10 border border-gray-200">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Admin Login
+                    </h2>
+                </div>
+                <form id="loginForm" class="mt-10 space-y-8">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input id="email" name="email" type="email" required 
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" 
+                                placeholder="Masukkan email">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input id="password" name="password" type="password" required 
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" 
+                                placeholder="Masukkan password">
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" 
+                            class="group relative w-full flex justify-center py-4 px-6 border border-transparent text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
+                            Masuk
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="hidden min-h-screen flex flex-col">
+        <!-- Navigation -->
+        <nav class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-20 items-center">
+                    <div class="flex items-center">
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                            Dashboard Admin
+                        </h1>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <button id="logoutBtn" 
+                            class="transform hover:scale-105 transition-all px-5 py-2.5 text-base font-medium text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100">
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto py-6 px-4 sm:px-6 lg:px-8 animate-fadeIn">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-all">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Total Pemilih</h3>
+                    <p class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent" id="totalVoters">0</p>
+                    <p class="text-base text-gray-600 mt-3">Terdaftar dalam sistem</p>
+                </div>
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-all">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Partisipasi</h3>
+                    <p class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent" id="participationRate">0%</p>
+                    <p class="text-base text-gray-600 mt-3">Telah memberikan suara</p>
+                </div>
+                <div class="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-all">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Status Pemilihan</h3>
+                    <p class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent" id="electionStatus">-</p>
+                    <p class="text-base text-gray-600 mt-3" id="timeRemaining"></p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-b border-gray-200 mb-8">
+                <nav class="-mb-px flex space-x-10 overflow-x-auto" aria-label="Tabs">
+                    <button class="tab-button active whitespace-nowrap px-2 py-4 font-semibold text-base transition-all" data-tab="candidates">
+                        Kandidat
+                    </button>
+                    <button class="tab-button whitespace-nowrap px-2 py-4 font-semibold text-base text-gray-500 transition-all" data-tab="voters">
+                        Pemilih
+                    </button>
+                    <button class="tab-button whitespace-nowrap px-2 py-4 font-semibold text-base text-gray-500 transition-all" data-tab="schedule">
+                        Jadwal
+                    </button>
+                    <button class="tab-button whitespace-nowrap px-2 py-4 font-semibold text-base text-gray-500 transition-all" data-tab="results">
+                        Hasil
+                    </button>
+                    <button class="tab-button whitespace-nowrap px-2 py-4 font-semibold text-base text-gray-500 transition-all" data-tab="settings">
+                        Pengaturan
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Contents -->
+            <!-- Candidates Tab -->
+            <div id="candidatesTab" class="tab-content">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Tambah Kandidat Baru</h3>
+                        <form id="addCandidateForm" class="space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label for="candidateName" class="block text-sm font-medium text-gray-700 mb-2">Nama Kandidat</label>
+                                    <input type="text" id="candidateName" name="name" required
+                                        class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                                </div>
+                                <div>
+                                    <label for="candidatePhoto" class="block text-sm font-medium text-gray-700 mb-2">Foto Kandidat</label>
+                                    <input type="file" id="candidatePhoto" name="photo" accept="image/*" required
+                                        class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                                </div>
+                            </div>
+                            <div>
+                                <button type="submit" 
+                                    class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                    Tambah Kandidat
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Daftar Kandidat</h3>
+                        <div id="candidateList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voters Tab -->
+            <div id="votersTab" class="tab-content hidden">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <div class="mb-10">
+                        <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Tambah Pemilih</h3>
+                        <div class="space-y-8">
+                            <!-- Manual Add -->
+                            <div class="p-8 bg-blue-50 rounded-2xl border border-blue-100">
+                                <h4 class="text-xl font-semibold text-gray-900 mb-6">Tambah Pemilih Manual</h4>
+                                <form id="addVoterForm" class="space-y-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label for="parentName" class="block text-sm font-medium text-gray-700 mb-2">Nama Orang Tua</label>
+                                            <input type="text" id="parentName" name="parentName" required
+                                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                                        </div>
+                                        <div>
+                                            <label for="studentName" class="block text-sm font-medium text-gray-700 mb-2">Nama Siswa</label>
+                                            <input type="text" id="studentName" name="studentName" required
+                                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button type="submit" 
+                                            class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                            Tambah Pemilih
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- CSV Import -->
+                            <div class="p-8 bg-blue-50 rounded-2xl border border-blue-100">
+                                <h4 class="text-xl font-semibold text-gray-900 mb-6">Import dari CSV</h4>
+                                <form id="importCsvForm" class="space-y-6">
+                                    <div>
+                                        <label for="csvFile" class="block text-sm font-medium text-gray-700 mb-2">File CSV (Format: Nama Orang Tua, Nama Siswa)</label>
+                                        <input type="file" id="csvFile" accept=".csv" required
+                                            class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                                    </div>
+                                    <div>
+                                        <button type="submit" 
+                                            class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                            Import CSV
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Daftar Pemilih</h3>
+                        <div class="overflow-x-auto rounded-xl border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Token</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Nama Orang Tua</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Nama Siswa</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="voterList" class="bg-white divide-y divide-gray-200">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Tab -->
+            <div id="scheduleTab" class="tab-content hidden">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Jadwal Pemilihan</h3>
+                    <form id="scheduleForm" class="space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label for="startTime" class="block text-sm font-medium text-gray-700 mb-2">Waktu Mulai</label>
+                                <input type="datetime-local" id="startTime" name="startTime" required
+                                    class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                            </div>
+                            <div>
+                                <label for="endTime" class="block text-sm font-medium text-gray-700 mb-2">Waktu Selesai</label>
+                                <input type="datetime-local" id="endTime" name="endTime" required
+                                    class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" 
+                                class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                Perbarui Jadwal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="resultsTab" class="tab-content hidden">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <div class="mb-10">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8">
+                            <h3 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Hasil Pemilihan</h3>
+                            <div class="flex space-x-4">
+                                <button id="toggleResultsBtn" 
+                                    class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                    Publikasikan Hasil
+                                </button>
+                                <button id="exportResultsBtn" 
+                                    class="inline-flex items-center justify-center py-4 px-6 border border-gray-300 shadow-lg text-base font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Export Hasil
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                            <div class="bg-blue-50 rounded-2xl p-8 border border-blue-100">
+                                <h4 class="text-xl font-semibold text-gray-900 mb-6">Statistik Partisipasi</h4>
+                                <div class="space-y-6">
+                                    <div>
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-base font-medium text-gray-700">Total Suara Masuk</span>
+                                            <span class="text-base font-semibold text-gray-900" id="totalVotesCast">0/0</span>
+                                        </div>
+                                        <div class="w-full bg-blue-200 rounded-full h-3">
+                                            <div class="bg-blue-600 h-3 rounded-full transition-all duration-500" id="votesProgress" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between mb-2">
+                                            <span class="text-base font-medium text-gray-700">Persentase Partisipasi</span>
+                                            <span class="text-base font-semibold text-gray-900" id="participationPercent">0%</span>
+                                        </div>
+                                        <div class="w-full bg-blue-200 rounded-full h-3">
+                                            <div class="bg-blue-600 h-3 rounded-full transition-all duration-500" id="participationProgress" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 rounded-2xl p-8 border border-blue-100">
+                                <h4 class="text-xl font-semibold text-gray-900 mb-6">Status Publikasi</h4>
+                                <div id="publicationStatus" class="text-gray-700 text-base">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Results Display -->
+                        <div id="resultsContainer" class="space-y-6">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content hidden">
+                <div class="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-200">
+                    <h3 class="text-2xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Pengaturan Admin</h3>
+                    <form id="updateSettingsForm" class="space-y-8">
+                        <div>
+                            <label for="electionName" class="block text-sm font-medium text-gray-700 mb-2">Nama Jenis Pemilihan</label>
+                            <input type="text" id="electionName" name="electionName" required
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" placeholder="Masukkan nama jenis pemilihan">
+                        </div>
+                        <div>
+                            <label for="institutionName" class="block text-sm font-medium text-gray-700 mb-2">Nama Instansi</label>
+                            <input type="text" id="institutionName" name="institutionName" required
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" placeholder="Masukkan nama instansi">
+                        </div>
+                        <div>
+                            <label for="footerText" class="block text-sm font-medium text-gray-700 mb-2">Teks Footer</label>
+                            <textarea id="footerText" name="footerText" rows="2"
+                                class="form-textarea block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base" 
+                                placeholder="Masukkan teks footer (contoh: © 2024 Nama Instansi. All rights reserved.)"></textarea>
+                        </div>
+                        <div>
+                            <label for="schoolLogo" class="block text-sm font-medium text-gray-700 mb-2">Logo Sekolah</label>
+                            <input type="file" id="schoolLogo" name="schoolLogo" accept="image/*"
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                        </div>
+                        <div>
+                            <label for="agencyLogo" class="block text-sm font-medium text-gray-700 mb-2">Logo Dinas</label>
+                            <input type="file" id="agencyLogo" name="agencyLogo" accept="image/*"
+                                class="form-input block w-full px-5 py-4 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all text-base">
+                        </div>
+                        <div>
+                            <button type="submit" 
+                                class="inline-flex justify-center py-4 px-6 border border-transparent shadow-lg text-base font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transform hover:scale-105 transition-all">
+                                Perbarui Pengaturan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Import scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
